@@ -335,7 +335,7 @@ impl PostingList {
         //for (block_id, (c_summary, v_summary)) in self.summaries.iter().enumerate() {
         //let dot = dot_product_dense_sparse(query, c_summary, v_summary);
         for (block_id, &dot) in dots.iter().enumerate() {
-            if heap_factor != 0{
+            if heap_factor != 0.0{
                 if heap.len() == k && dot < -heap_factor * heap.top() {
                     continue;
                 }

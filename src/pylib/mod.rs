@@ -1,9 +1,10 @@
 use crate::{InvertedIndex, SparseDataset};
 use half::f16;
 use numpy::PyReadonlyArrayDyn;
-use numpy::{PyArray2, IntoPyArray};
 use ndarray::Array2;
 use pyo3::prelude::*;
+use pyo3::types::PyList;
+use pyo3::types::PyTuple
 use rayon::prelude::*;
 use std::fs;
 use crate::inverted_index::{BlockingStrategy, Configuration, PruningStrategy, SummarizationStrategy};
@@ -107,7 +108,7 @@ impl PySeismicIndex {
         // 设置 rayon 的线程池
         rayon::ThreadPoolBuilder::new().build_global().unwrap();
 
-        batch_queries = self.queries.into_iter().collect::<SparseDataset<f32>>().into();
+        let batch_queries = self.queries.into_iter().collect::<SparseDataset<f32>>().into();
     
         // 并行处理查询
         self.results = batch_queries
@@ -152,20 +153,25 @@ impl PySeismicIndex {
         Ok(())
     }
 
-    pub fn get_results<'py> (&self, py: Python<'py>, k: usize) -> Vec<Vec<usize>>{
-        // 提取 usize 项
-        let num_queries = self.results.len();
-        let mut indices_data = Vec::with_capacity(num_queries);
+    pub fn get_results<'py>(&self, py: Python<'py>, k: usize) -> &'py PyList {
+        // 创建一个外层的 Python 列表用于包含所有的行
+        let outer_py_list = PyList::empty(py);
 
         for result_row in self.results.iter() {
             let mut indices_row = Vec::with_capacity(k);
-        
+
             for &(_score, idx) in result_row.iter() {
                 indices_row.push(idx);
             }
-        
-            indices_data.push(indices_row);
+
+            // 将 Rust 的 Vec 转换为 Python 列表
+            let inner_py_list = PyList::new(py, &indices_row);
+
+            // 将内部 Python 列表添加到外部 Python 列表中
+            outer_py_list.append(inner_py_list).unwrap();
         }
-        indices_data
+
+        // 返回外部列表，这相当于一个二维数组的结构
+        outer_py_list
     }
 }
