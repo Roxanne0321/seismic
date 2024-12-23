@@ -4,7 +4,7 @@ use numpy::PyReadonlyArrayDyn;
 use ndarray::Array2;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
-use pyo3::types::PyTuple；
+use pyo3::types::PyTuple;
 use rayon::prelude::*;
 use std::fs;
 use crate::inverted_index::{BlockingStrategy, Configuration, PruningStrategy, SummarizationStrategy};
@@ -108,7 +108,7 @@ impl PySeismicIndex {
         // 设置 rayon 的线程池
         rayon::ThreadPoolBuilder::new().build_global().unwrap();
 
-        let batch_queries: SparseDataset<f16> = self.queries.into_iter().collect::<SparseDataset<f32>>().into();
+        let batch_queries: SparseDataset<f32> = self.queries.into_iter().collect();
     
         // 并行处理查询
         self.results = batch_queries
@@ -128,7 +128,7 @@ impl PySeismicIndex {
     }
 
     #[allow(clippy::type_complexity)]
-    pub fn process_queries<'py>(&self, py: Python<'py>, query_data: &'py PyAny) -> PyResult<()> {
+    pub fn process_queries<'py>(&mut self, py: Python<'py>, query_data: &'py PyAny) -> PyResult<()> {
         // 尝试将 query_data 解析为 PyList
         let rows: &PyList = query_data.downcast::<PyList>()?;
     
