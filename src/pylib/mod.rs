@@ -107,7 +107,7 @@ impl PySeismicIndex {
         // 设置 rayon 的线程池
         rayon::ThreadPoolBuilder::new().build_global().unwrap();
 
-        batch_queries = self.quries.into_iter().collect::<SparseDataset<f32>>().into();
+        batch_queries = self.queries.into_iter().collect::<SparseDataset<f32>>().into();
     
         // 并行处理查询
         self.results = batch_queries
