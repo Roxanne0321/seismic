@@ -31,6 +31,7 @@ rand = "0.8.5"
 qwt = {version = "0.2.0"}
 pyo3 = { version = "0.19.2", features = ["extension-module"] }
 numpy = "0.19.0"
+ndarray = "0.15"
 indicatif = {version = "0.17.8", features = ["rayon"]}
 
 [profile.release]
