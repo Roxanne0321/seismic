@@ -4,7 +4,7 @@ use numpy::PyReadonlyArrayDyn;
 use ndarray::Array2;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
-use pyo3::types::PyTuple
+use pyo3::types::PyTuple；
 use rayon::prelude::*;
 use std::fs;
 use crate::inverted_index::{BlockingStrategy, Configuration, PruningStrategy, SummarizationStrategy};
@@ -108,7 +108,7 @@ impl PySeismicIndex {
         // 设置 rayon 的线程池
         rayon::ThreadPoolBuilder::new().build_global().unwrap();
 
-        let batch_queries = self.queries.into_iter().collect::<SparseDataset<f32>>().into();
+        let batch_queries: SparseDataset<f16> = self.queries.into_iter().collect::<SparseDataset<f32>>().into();
     
         // 并行处理查询
         self.results = batch_queries
@@ -139,8 +139,8 @@ impl PySeismicIndex {
             let tuple: &PyTuple = row.downcast::<PyTuple>()?;
         
             // 获取 indices 和 values
-            let indices_pylist: &PyList = tuple.get_item(0).downcast::<PyList>()?;
-            let values_pylist: &PyList = tuple.get_item(1).downcast::<PyList>()?;
+            let indices_pylist: &PyList = tuple.get_item(0)?.downcast::<PyList>()?;
+            let values_pylist: &PyList = tuple.get_item(1)?.downcast::<PyList>()?;
         
             // 提取为 Vec<usize> 和 Vec<f32>
             let indices: Vec<usize> = indices_pylist.extract()?;
