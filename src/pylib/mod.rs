@@ -12,7 +12,7 @@ use crate::inverted_index::{BlockingStrategy, Configuration, PruningStrategy, Su
 #[pyclass]
 pub struct PySeismicIndex {
     inverted_index: InvertedIndex<f16>,
-    queries: Vec<(Vec<usize>, Vec<f32>)>,
+    queries: Vec<(Vec<u16>, Vec<f32>)>,
     results: Vec<Vec<(f32, usize)>>,
 }
 
@@ -100,7 +100,7 @@ impl PySeismicIndex {
 
     #[allow(clippy::too_many_arguments)]
     pub fn batch_search<'py>(
-        &self,
+        &mut self,
         k: usize,
         query_cut: usize,
         heap_factor: f32, 
@@ -108,7 +108,7 @@ impl PySeismicIndex {
         // 设置 rayon 的线程池
         rayon::ThreadPoolBuilder::new().build_global().unwrap();
 
-        let batch_queries: SparseDataset<f32> = self.queries.into_iter().collect();
+        let batch_queries: SparseDataset<f32> = self.queries.clone().into_iter().collect();
     
         // 并行处理查询
         self.results = batch_queries
@@ -143,7 +143,7 @@ impl PySeismicIndex {
             let values_pylist: &PyList = tuple.get_item(1)?.downcast::<PyList>()?;
         
             // 提取为 Vec<usize> 和 Vec<f32>
-            let indices: Vec<usize> = indices_pylist.extract()?;
+            let indices: Vec<u16> = indices_pylist.extract()?;
             let values: Vec<f32> = values_pylist.extract()?;
         
             // 追加到 vec 中
